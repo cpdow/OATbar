@@ -22,6 +22,13 @@ Turn on "Demo mode" on the setup screen, grant the overlay permission, and tap S
 sweeps a fake temperature from -10°C to 30°C so you can test position, size and units.
 Remember to turn Demo mode off before using it in the truck.
 
+## Updating the app
+`app/debug.keystore` is a fixed debug signing key, committed on purpose, so every build (local or
+GitHub) is signed the same way and a newer APK installs over an older one. If you installed a build
+made before this key was added, uninstall it once first:
+`adb uninstall com.example.oatbar`
+Do not reuse this key for anything you publish.
+
 ## Notes
 - If the status says "ECU gave no data for PID 0146", first confirm the truck reports the PID with
   a phone app (Car Scanner ELM OBD2) before debugging this app.

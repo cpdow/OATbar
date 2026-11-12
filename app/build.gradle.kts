@@ -15,6 +15,17 @@ android {
         versionName = "1.0"
     }
 
+    // Fixed debug signing key (committed on purpose; it protects nothing). Every build is then
+    // signed identically, so a newer APK installs over an older one without uninstalling first.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
