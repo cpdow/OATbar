@@ -174,6 +174,19 @@ class OatBarService : Service() {
         main.post { setText(tempC) }
     }
 
+    /** Sweeps a fake temperature between -10°C and 30°C, one degree per second, until demo mode is turned off. */
+    private fun runDemo() {
+        var c = 2
+        var step = 1
+        while (running && prefs.demo) {
+            show(c, "Demo mode (simulated temperature, no dongle)")
+            Thread.sleep(1000)
+            if (c >= 30) step = -1
+            if (c <= -10) step = 1
+            c += step
+        }
+    }
+
     // ---------- OBD worker ----------
 
     private fun workerLoop() {
@@ -181,6 +194,10 @@ class OatBarService : Service() {
         while (running) {
             var transport: ObdTransport? = null
             try {
+                if (prefs.demo) {
+                    runDemo()
+                    continue
+                }
                 val addr = prefs.address
                 if (addr == null) {
                     show(null, "No device selected")

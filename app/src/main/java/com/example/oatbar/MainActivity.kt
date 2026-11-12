@@ -34,6 +34,7 @@ class MainActivity : Activity() {
     private lateinit var statusView: TextView
     private lateinit var unitBtn: Button
     private lateinit var transportBtn: Button
+    private lateinit var demoBtn: Button
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,6 +115,8 @@ class MainActivity : Activity() {
         })
 
         root.addView(header("4. Run"))
+        demoBtn = button("") { prefs.demo = !prefs.demo; render(); refreshService() }
+        root.addView(demoBtn)
         root.addView(row(
             button("Start") { startOat() },
             button("Stop") {
@@ -131,6 +134,7 @@ class MainActivity : Activity() {
         deviceView.text = "Device: ${addr ?: "none selected"}"
         transportBtn.text = "Transport: ${if (prefs.useBle) "BLE" else "Classic SPP"} (tap to switch)"
         unitBtn.text = "Units: ${if (prefs.fahrenheit) "°F" else "°C"} (tap to switch)"
+        demoBtn.text = "Demo mode: ${if (prefs.demo) "ON" else "OFF"} (fake temperature, no dongle needed)"
         val c = OatState.lastTempC
         val last = if (c == null) "--" else
             "$c°C / ${(c * 9.0 / 5.0 + 32).roundToInt()}°F"
@@ -223,7 +227,7 @@ class MainActivity : Activity() {
     // ---------- run ----------
 
     private fun startOat() {
-        if (prefs.address == null) { toast("Pick a dongle first"); return }
+        if (prefs.address == null && !prefs.demo) { toast("Pick a dongle first, or turn on Demo mode"); return }
         if (!Settings.canDrawOverlays(this)) { toast("Grant overlay permission first"); return }
         startForegroundService(
             Intent(this, OatBarService::class.java).setAction(OatBarService.ACTION_START)

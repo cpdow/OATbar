@@ -35,6 +35,11 @@ class Prefs(ctx: Context) {
         get() = sp.getInt("poll", 10)
         set(v) { sp.edit().putInt("poll", v).apply() }
 
+    /** Demo mode: show a simulated temperature instead of talking to a dongle (for emulator testing). */
+    var demo: Boolean
+        get() = sp.getBoolean("demo", false)
+        set(v) { sp.edit().putBoolean("demo", v).apply() }
+
     /** Whether the service should auto-start at boot. */
     var enabled: Boolean
         get() = sp.getBoolean("enabled", false)

@@ -17,6 +17,11 @@ in a small always-on-top pill, positioned next to your head unit's clock.
 4. Tap Start. Use the arrows to move the pill beside the clock; Text +/- to resize.
 5. The service restarts at boot once you've started it.
 
+## Testing without a dongle (emulator)
+Turn on "Demo mode" on the setup screen, grant the overlay permission, and tap Start. The pill
+sweeps a fake temperature from -10°C to 30°C so you can test position, size and units.
+Remember to turn Demo mode off before using it in the truck.
+
 ## Notes
 - If the status says "ECU gave no data for PID 0146", first confirm the truck reports the PID with
   a phone app (Car Scanner ELM OBD2) before debugging this app.
