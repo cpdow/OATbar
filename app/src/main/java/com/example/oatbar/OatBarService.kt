@@ -33,6 +33,23 @@ class OatBarService : Service() {
         const val ACTION_START = "com.example.oatbar.START"
         const val ACTION_REFRESH = "com.example.oatbar.REFRESH"
         const val ACTION_STOP = "com.example.oatbar.STOP"
+
+        /**
+         * Starts the service if the user left it switched on (pressed Start and not Stop) and the
+         * prerequisites are met. Safe to call repeatedly: an already-running service ignores it.
+         * Used at boot and whenever the setup screen opens.
+         */
+        fun startIfEnabled(ctx: Context) {
+            val p = Prefs(ctx)
+            if (!p.enabled) return
+            if (p.address == null && !p.demo) return
+            if (!Settings.canDrawOverlays(ctx)) return
+            try {
+                ctx.startForegroundService(Intent(ctx, OatBarService::class.java).setAction(ACTION_START))
+            } catch (e: Exception) {
+                OatState.update("Auto-start blocked: ${e.message}")
+            }
+        }
         private const val CHANNEL = "oatbar"
     }
 
@@ -238,7 +255,8 @@ class OatBarService : Service() {
             }
             if (!running) break
             try { Thread.sleep(backoff) } catch (_: InterruptedException) {}
-            backoff = (backoff * 2).coerceAtMost(30_000L)
+            // Keep retrying fairly quickly: at power-up the dongle and Bluetooth may not be ready yet.
+            backoff = (backoff * 2).coerceAtMost(8_000L)
         }
     }
 }

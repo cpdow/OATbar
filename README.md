@@ -15,7 +15,13 @@ in a small always-on-top pill, positioned next to your head unit's clock.
 3. Pick the dongle: "Paired devices" (classic dongles, pair in system Bluetooth settings first)
    or "Scan for BLE" (Vgate iCar Pro 2S, OBDLink CX, etc.).
 4. Tap Start. Use the arrows to move the pill beside the clock; Text +/- to resize.
-5. The service restarts at boot once you've started it.
+5. Auto-start: once you've tapped Start (and not Stop), OATbar starts itself when the head unit
+   powers up, connects to the saved dongle, and shows the pill at the saved position. Tapping
+   Stop turns auto-start off until you tap Start again.
+   If it doesn't come up after a power cycle, look in the head unit's settings for an
+   "auto-start" / "boot apps" / "app manager" list and allow OATbar there, and turn off any
+   battery optimization for it. You can also add OATbar to the unit's "auto-run apps" list,
+   since opening the app starts the pill too.
 
 ## Testing without a dongle (emulator)
 Turn on "Demo mode" on the setup screen, grant the overlay permission, and tap Start. The pill

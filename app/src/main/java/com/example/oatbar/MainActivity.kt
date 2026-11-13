@@ -41,6 +41,8 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
         buildUi()
+        // If the head unit's own "auto-run apps" list launches OATbar, this also starts the pill.
+        OatBarService.startIfEnabled(this)
     }
 
     override fun onResume() {
