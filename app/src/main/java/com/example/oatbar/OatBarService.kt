@@ -6,7 +6,10 @@ import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
@@ -39,14 +42,20 @@ class OatBarService : Service() {
          * prerequisites are met. Safe to call repeatedly: an already-running service ignores it.
          * Used at boot and whenever the setup screen opens.
          */
-        fun startIfEnabled(ctx: Context) {
+        fun startIfEnabled(ctx: Context, source: String = "app opened") {
             val p = Prefs(ctx)
-            if (!p.enabled) return
-            if (p.address == null && !p.demo) return
-            if (!Settings.canDrawOverlays(ctx)) return
+            val why = when {
+                !p.enabled -> "Start not pressed (or Stop was pressed)"
+                p.address == null && !p.demo -> "no dongle selected"
+                !Settings.canDrawOverlays(ctx) -> "overlay permission missing"
+                else -> null
+            }
+            if (why != null) { p.note("$source: NOT started, $why"); return }
             try {
                 ctx.startForegroundService(Intent(ctx, OatBarService::class.java).setAction(ACTION_START))
+                p.note("$source: service start requested")
             } catch (e: Exception) {
+                p.note("$source: start BLOCKED (${e.message})")
                 OatState.update("Auto-start blocked: ${e.message}")
             }
         }
@@ -86,6 +95,8 @@ class OatBarService : Service() {
         prefs.enabled = true
         if (!running) {
             running = true
+            prefs.note("service started")
+            registerWake()
             main.post { addOverlay() }
             worker = Thread({ workerLoop() }, "oatbar-obd").also { it.start() }
         }
@@ -94,10 +105,44 @@ class OatBarService : Service() {
 
     override fun onDestroy() {
         running = false
+        wakeReceiver?.let { try { unregisterReceiver(it) } catch (_: Exception) {} }
+        wakeReceiver = null
         worker?.interrupt()
         main.post { removeOverlay() }
         OatState.update("Stopped", null)
         super.onDestroy()
+    }
+
+    // ---------- wake from standby ----------
+
+    private var wakeReceiver: BroadcastReceiver? = null
+
+    /**
+     * Head units often go into standby instead of shutting down. If the service survives that,
+     * these signals make sure the pill is back on screen and the dongle connection is retried.
+     */
+    private fun registerWake() {
+        if (wakeReceiver != null) return
+        val r = object : BroadcastReceiver() {
+            override fun onReceive(c: Context, i: Intent) {
+                val action = i.action ?: return
+                val btOn = action == BluetoothAdapter.ACTION_STATE_CHANGED &&
+                        i.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON
+                if (action == BluetoothAdapter.ACTION_STATE_CHANGED && !btOn) return
+                Prefs(c).note("wake signal: ${action.substringAfterLast('.')}")
+                main.post { addOverlay() } // does nothing if the pill is already showing
+                if (btOn || OatState.status != "OK") worker?.interrupt()
+            }
+        }
+        val f = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_USER_PRESENT)
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        }
+        if (Build.VERSION.SDK_INT >= 33) registerReceiver(r, f, Context.RECEIVER_EXPORTED)
+        else registerReceiver(r, f)
+        wakeReceiver = r
     }
 
     // ---------- foreground notification ----------

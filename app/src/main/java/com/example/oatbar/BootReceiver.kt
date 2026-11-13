@@ -14,7 +14,8 @@ class BootReceiver : BroadcastReceiver() {
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             "android.intent.action.QUICKBOOT_POWERON",
-            "com.htc.intent.action.QUICKBOOT_POWERON" -> OatBarService.startIfEnabled(context)
+            "com.htc.intent.action.QUICKBOOT_POWERON" ->
+                OatBarService.startIfEnabled(context, "boot signal ${intent.action?.substringAfterLast('.')}")
         }
     }
 }

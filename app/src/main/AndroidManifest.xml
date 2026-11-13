@@ -36,6 +36,20 @@
             </intent-filter>
         </activity>
 
+        <!-- Invisible entry for the head unit's "application starts automatically" list. -->
+        <activity
+            android:name=".AutoStartActivity"
+            android:exported="true"
+            android:label="OATbar Auto-start"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".OatBarService"
             android:exported="false"

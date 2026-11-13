@@ -28,6 +28,22 @@ Turn on "Demo mode" on the setup screen, grant the overlay permission, and tap S
 sweeps a fake temperature from -10°C to 30°C so you can test position, size and units.
 Remember to turn Demo mode off before using it in the truck.
 
+## Checking that auto-start works
+The setup screen has an "Auto-start log" at the bottom. After a power cycle of the head unit, open
+OATbar and read it (newest first):
+- `boot signal BOOT_COMPLETED: service start requested` then `service started`: the unit sends the
+  normal boot signal and it works.
+- `wake signal: SCREEN_ON` (or USER_PRESENT / bluetooth ON) with no boot line: the unit wakes from
+  standby rather than rebooting. That is fine as long as the pill is on screen.
+- `NOT started, ...`: the reason is printed (Start not pressed, no dongle, overlay permission).
+- Nothing new at all: the unit is not letting OATbar run in the background after power-up. Use the
+  unit's "application starts automatically" setting (some units: System settings > User) and pick
+  "OATbar Auto-start". It is an invisible entry: it starts the pill and closes itself, so the setup
+  screen never opens. It also appears as a second icon in the app list; tapping it does nothing
+  visible. Make sure OATbar is excluded from any memory cleaner. Swiping OATbar away in the
+  running-apps list or using "Clear All" can force-stop it, and a force-stopped app gets no boot signal
+  until it is opened again.
+
 ## Updating the app
 `app/debug.keystore` is a fixed debug signing key, committed on purpose, so every build (local or
 GitHub) is signed the same way and a newer APK installs over an older one. If you installed a build

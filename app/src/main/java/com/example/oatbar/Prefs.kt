@@ -40,6 +40,17 @@ class Prefs(ctx: Context) {
         get() = sp.getBoolean("demo", false)
         set(v) { sp.edit().putBoolean("demo", v).apply() }
 
+    /** Rolling log (newest first) of auto-start events, shown on the setup screen for troubleshooting. */
+    var log: String
+        get() = sp.getString("log", "") ?: ""
+        set(v) { sp.edit().putString("log", v).apply() }
+
+    fun note(msg: String) {
+        val t = java.text.SimpleDateFormat("MMM d HH:mm:ss", java.util.Locale.US).format(java.util.Date())
+        val lines = (listOf("$t  $msg") + log.split('\n').filter { it.isNotBlank() }).take(8)
+        log = lines.joinToString("\n")
+    }
+
     /** Whether the service should auto-start at boot. */
     var enabled: Boolean
         get() = sp.getBoolean("enabled", false)

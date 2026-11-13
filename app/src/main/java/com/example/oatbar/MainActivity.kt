@@ -35,6 +35,7 @@ class MainActivity : Activity() {
     private lateinit var unitBtn: Button
     private lateinit var transportBtn: Button
     private lateinit var demoBtn: Button
+    private lateinit var logView: TextView
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,6 +129,11 @@ class MainActivity : Activity() {
         statusView = TextView(this).apply { setPadding(0, dp(12), 0, 0) }
         root.addView(statusView)
 
+        root.addView(header("Auto-start log"))
+        logView = TextView(this).apply { textSize = 12f; typeface = android.graphics.Typeface.MONOSPACE }
+        root.addView(logView)
+        root.addView(button("Clear log") { prefs.log = ""; render() })
+
         setContentView(ScrollView(this).apply { addView(root) })
     }
 
@@ -141,6 +147,7 @@ class MainActivity : Activity() {
         val last = if (c == null) "--" else
             "$c°C / ${(c * 9.0 / 5.0 + 32).roundToInt()}°F"
         statusView.text = "Status: ${OatState.status}\nLast reading: $last"
+        logView.text = "(newest first)\n" + prefs.log.ifBlank { "nothing recorded yet" }
     }
 
     private fun refreshService() {
